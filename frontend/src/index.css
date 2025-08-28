@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f8fafc;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* 医疗数据表格样式 */
+.medical-table {
+  @apply w-full bg-white rounded-lg shadow-sm border border-gray-200;
+}
+
+.medical-table th {
+  @apply bg-gray-50 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+}
+
+.medical-table td {
+  @apply px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-t border-gray-200;
+}
+
+/* 指标状态样式 */
+.indicator-normal {
+  @apply text-green-600 bg-green-50 border border-green-200;
+}
+
+.indicator-high {
+  @apply text-red-600 bg-red-50 border border-red-200;
+}
+
+.indicator-low {
+  @apply text-yellow-600 bg-yellow-50 border border-yellow-200;
+}
+
+/* 医疗卡片样式 */
+.medical-card {
+  @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
+}
+
+.medical-card-header {
+  @apply flex items-center justify-between mb-4;
+}
+
+.medical-card-title {
+  @apply text-lg font-semibold text-gray-900;
+}
