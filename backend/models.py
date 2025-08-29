@@ -49,7 +49,11 @@ class OCRResult(BaseModel):
 
 class UploadResponse(BaseModel):
     """上传响应"""
-    success: bool
-    message: str
-    report_id: Optional[str] = None
-    items: Optional[List[BloodTestItem]] = None
+    patient_name: str
+    hospital: str
+    test_date: str
+    upload_time: str
+    file_path: str
+    analysis: Dict[str, str]
+    status: str
+    fix_applied: bool

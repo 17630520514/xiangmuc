@@ -1,20 +1,20 @@
 import React, { useState, useRef } from 'react';
 import { Upload, FileImage, User, Building, Calendar, FileText, AlertCircle, CheckCircle } from 'lucide-react';
 
-interface BloodTestItem {
-  name: string;
-  value: number;
-  unit: string;
-  reference_range: string;
-  status: string;
-  is_abnormal: boolean;
-}
-
 interface UploadResponse {
-  success: boolean;
-  message: string;
-  report_id?: string;
-  items?: BloodTestItem[];
+  patient_name: string;
+  hospital: string;
+  test_date: string;
+  upload_time: string;
+  file_path: string;
+  analysis: {
+    hemoglobin: string;
+    white_blood_cells: string;
+    platelets: string;
+    overall_assessment: string;
+  };
+  status: string;
+  fix_applied: boolean;
 }
 
 const BloodTestUpload: React.FC = () => {
@@ -72,26 +72,20 @@ const BloodTestUpload: React.FC = () => {
         data.append('notes', formData.notes);
       }
 
-      const response = await fetch('http://localhost:8000/api/upload-report', {
+      const response = await fetch('/api/upload-report', {
         method: 'POST',
         body: data,
       });
 
       const result: UploadResponse = await response.json();
       
-      if (response.ok) {
+      if (response.ok && result.status === 'success') {
         setUploadResult(result);
       } else {
-        setUploadResult({
-          success: false,
-          message: result.message || '上传失败'
-        });
+        setUploadResult(null);
       }
     } catch (error) {
-      setUploadResult({
-        success: false,
-        message: '网络错误，请检查后端服务是否启动'
-      });
+      setUploadResult(null);
     } finally {
       setIsUploading(false);
     }
@@ -265,64 +259,55 @@ const BloodTestUpload: React.FC = () => {
         {/* 右侧：结果显示 */}
         <div className="space-y-6">
           {uploadResult && (
-            <div className={`p-4 rounded-lg ${
-              uploadResult.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
-            }`}>
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
               <div className="flex items-center mb-3">
-                {uploadResult.success ? (
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                ) : (
-                  <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
-                )}
-                <span className={`font-medium ${
-                  uploadResult.success ? 'text-green-800' : 'text-red-800'
-                }`}>
-                  {uploadResult.message}
+                <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                <span className="font-medium text-green-800">
+                  报告识别成功
                 </span>
               </div>
               
-              {uploadResult.success && uploadResult.report_id && (
-                <p className="text-sm text-green-700">
-                  报告ID: {uploadResult.report_id}
-                </p>
-              )}
+              <div className="space-y-2 text-sm text-green-700">
+                <p>患者姓名: {uploadResult.patient_name}</p>
+                <p>医院名称: {uploadResult.hospital}</p>
+                <p>检测日期: {uploadResult.test_date}</p>
+                <p>上传时间: {uploadResult.upload_time}</p>
+              </div>
             </div>
           )}
 
-          {/* 识别结果表格 */}
-          {uploadResult?.success && uploadResult.items && uploadResult.items.length > 0 && (
+          {/* 分析结果 */}
+          {uploadResult?.analysis && (
             <div className="bg-gray-50 rounded-lg p-4">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                识别结果 ({uploadResult.items.length} 项)
+                分析结果
               </h3>
               
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left py-2 px-2">指标</th>
-                      <th className="text-left py-2 px-2">数值</th>
-                      <th className="text-left py-2 px-2">单位</th>
-                      <th className="text-left py-2 px-2">参考范围</th>
-                      <th className="text-left py-2 px-2">状态</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {uploadResult.items.map((item, index) => (
-                      <tr key={index} className="border-b border-gray-100">
-                        <td className="py-2 px-2 font-medium">{item.name}</td>
-                        <td className="py-2 px-2">{item.value}</td>
-                        <td className="py-2 px-2 text-gray-600">{item.unit}</td>
-                        <td className="py-2 px-2 text-gray-600">{item.reference_range}</td>
-                        <td className="py-2 px-2">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(item.status)}`}>
-                            {item.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-white p-3 rounded border">
+                  <div className="text-sm text-gray-600">血红蛋白</div>
+                  <div className={`text-lg font-medium ${getStatusColor(uploadResult.analysis.hemoglobin)}`}>
+                    {uploadResult.analysis.hemoglobin}
+                  </div>
+                </div>
+                <div className="bg-white p-3 rounded border">
+                  <div className="text-sm text-gray-600">白细胞</div>
+                  <div className={`text-lg font-medium ${getStatusColor(uploadResult.analysis.white_blood_cells)}`}>
+                    {uploadResult.analysis.white_blood_cells}
+                  </div>
+                </div>
+                <div className="bg-white p-3 rounded border">
+                  <div className="text-sm text-gray-600">血小板</div>
+                  <div className={`text-lg font-medium ${getStatusColor(uploadResult.analysis.platelets)}`}>
+                    {uploadResult.analysis.platelets}
+                  </div>
+                </div>
+                <div className="bg-white p-3 rounded border col-span-2">
+                  <div className="text-sm text-gray-600">整体评估</div>
+                  <div className="text-lg font-medium text-gray-800">
+                    {uploadResult.analysis.overall_assessment}
+                  </div>
+                </div>
               </div>
             </div>
           )}

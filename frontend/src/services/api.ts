@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { AnalysisRequest, AnalysisResponse, PatientHistory } from '../types/bloodTest';
 
-// API基础配置
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+// API基础配置 - 使用相对路径，让lighttpd代理处理
+const API_BASE_URL = process.env.REACT_APP_API_URL || '';
 
 const api = axios.create({
   baseURL: API_BASE_URL,

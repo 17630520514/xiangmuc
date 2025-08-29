@@ -155,7 +155,7 @@ function App() {
             <div className="flex items-center">
               <AlertCircle className="w-5 h-5 text-red-500 mr-2" />
               <p className="text-red-700">
-                后端服务暂时不可用。请确保后端API服务正在运行（http://localhost:8000）
+                后端服务暂时不可用。请检查网络连接或联系管理员
               </p>
             </div>
           </div>
