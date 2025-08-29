@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 from typing import List, Optional, Dict
 from models import BloodTestReport, BloodTestItem
+from utils import parse_iso_datetime
 import uuid
 
 class BloodTestStorageService:
@@ -142,7 +143,7 @@ class BloodTestStorageService:
             test_date_str = report_data.get('test_date')
             if test_date_str:
                 try:
-                    test_date = datetime.fromisoformat(test_date_str)
+                    test_date = parse_iso_datetime(test_date_str)
                     if start_date <= test_date <= end_date:
                         results.append(BloodTestReport(**report_data))
                 except ValueError:
@@ -173,7 +174,7 @@ class BloodTestStorageService:
             test_date_str = report.get('test_date')
             if test_date_str:
                 try:
-                    dates.append(datetime.fromisoformat(test_date_str))
+                    dates.append(parse_iso_datetime(test_date_str))
                 except ValueError:
                     continue
         

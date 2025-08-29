@@ -20,6 +20,7 @@ from pathlib import Path
 from models import BloodTestReport, BloodTestItem, BloodTestComparison, UploadResponse
 from blood_test_service import BloodTestAnalysisService
 from storage_service import BloodTestStorageService
+from utils import parse_iso_datetime
 
 # 创建FastAPI应用实例
 app = FastAPI(
@@ -72,7 +73,7 @@ async def upload_blood_test_report(
         
         # 解析日期
         try:
-            parsed_date = datetime.fromisoformat(test_date)
+            parsed_date = parse_iso_datetime(test_date)
         except ValueError:
             raise HTTPException(status_code=400, detail="日期格式错误，请使用ISO格式")
         
