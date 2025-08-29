@@ -271,7 +271,8 @@ class BloodTestAnalysisService:
         return {
             "trends": trends,
             "abnormal_changes": abnormal_changes,
-            "comparison_summary": self._generate_comparison_summary(current_report, previous_reports)
+            "comparison_summary": self._generate_comparison_summary(current_report, previous_reports),
+            "previous_reports": previous_reports
         }
     
     def _calculate_trend(self, values: List[float]) -> str:

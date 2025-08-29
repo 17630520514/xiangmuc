@@ -22,6 +22,7 @@ const BloodTestUpload: React.FC = () => {
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [isUploading, setIsUploading] = useState(false);
   const [uploadResult, setUploadResult] = useState<UploadResponse | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     patient_name: '',
     hospital: '',
@@ -38,6 +39,7 @@ const BloodTestUpload: React.FC = () => {
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
       setUploadResult(null);
+      setError(null);
     }
   };
 
@@ -51,16 +53,17 @@ const BloodTestUpload: React.FC = () => {
 
   const handleUpload = async () => {
     if (!selectedFile) {
-      alert('请先选择图片文件');
+      setError('请先选择图片文件');
       return;
     }
 
     if (!formData.patient_name || !formData.hospital || !formData.test_date) {
-      alert('请填写完整信息');
+      setError('请填写完整信息');
       return;
     }
 
     setIsUploading(true);
+    setError(null);
     
     try {
       const data = new FormData();
@@ -81,11 +84,14 @@ const BloodTestUpload: React.FC = () => {
       
       if (response.ok && result.status === 'success') {
         setUploadResult(result);
+        setError(null);
       } else {
         setUploadResult(null);
+        setError(result.status === 'error' ? '识别失败，请检查图片质量或重试' : '上传失败，请重试');
       }
     } catch (error) {
       setUploadResult(null);
+      setError('网络错误，请检查网络连接后重试');
     } finally {
       setIsUploading(false);
     }
@@ -95,6 +101,7 @@ const BloodTestUpload: React.FC = () => {
     setSelectedFile(null);
     setPreviewUrl('');
     setUploadResult(null);
+    setError(null);
     setFormData({
       patient_name: '',
       hospital: '',
@@ -258,6 +265,20 @@ const BloodTestUpload: React.FC = () => {
 
         {/* 右侧：结果显示 */}
         <div className="space-y-6">
+          {/* 错误信息显示 */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="flex items-center mb-3">
+                <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
+                <span className="font-medium text-red-800">
+                  识别失败
+                </span>
+              </div>
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
+
+          {/* 成功信息显示 */}
           {uploadResult && (
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
               <div className="flex items-center mb-3">

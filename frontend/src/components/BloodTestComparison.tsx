@@ -29,6 +29,7 @@ interface ComparisonData {
   }>;
   abnormal_changes: string[];
   comparison_summary: string;
+  previous_reports?: BloodTestReport[]; // 新增字段，用于存储对比的报告
 }
 
 const BloodTestComparison: React.FC = () => {
@@ -57,7 +58,7 @@ const BloodTestComparison: React.FC = () => {
 
   const fetchReports = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/reports');
+      const response = await fetch('/api/reports');
       if (response.ok) {
         const data = await response.json();
         setReports(data);
@@ -73,10 +74,14 @@ const BloodTestComparison: React.FC = () => {
     setLoading(true);
     
     try {
-      const response = await fetch(`http://localhost:8000/api/reports/compare/${report.id}`);
+      const response = await fetch(`/api/reports/compare/${report.id}`);
       if (response.ok) {
         const data = await response.json();
-        setComparisonData(data.comparison);
+        // 保存完整的对比数据，包括对比报告信息
+        setComparisonData({
+          ...data.comparison,
+          previous_reports: data.comparison.previous_reports || []
+        });
       }
     } catch (error) {
       console.error('获取对比数据失败:', error);
@@ -267,9 +272,36 @@ const BloodTestComparison: React.FC = () => {
                 对比分析结果
               </h3>
               
+              {/* 对比关系说明 */}
+              {comparisonData.previous_reports && comparisonData.previous_reports.length > 0 && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+                  <h4 className="font-medium text-yellow-800 mb-2">📊 对比关系</h4>
+                  <div className="text-sm text-yellow-700 space-y-2">
+                    <div className="flex items-center">
+                      <span className="font-medium">当前报告:</span>
+                      <span className="ml-2">{selectedReport?.patient_name} - {formatDate(selectedReport?.test_date || '')}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="font-medium">对比报告:</span>
+                      <span className="ml-2">
+                        {comparisonData.previous_reports.map((report, index) => (
+                          <span key={report.id} className="inline-block bg-yellow-100 px-2 py-1 rounded mr-2 mb-1">
+                            {report.patient_name} - {formatDate(report.test_date)}
+                          </span>
+                        ))}
+                      </span>
+                    </div>
+                    <div className="text-xs text-yellow-600 mt-2">
+                      💡 系统自动查找同名患者的历史报告进行趋势分析
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               {/* 对比摘要 */}
               {comparisonData.comparison_summary && (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                  <h4 className="font-medium text-blue-800 mb-2">📋 对比摘要</h4>
                   <p className="text-sm text-blue-800">{comparisonData.comparison_summary}</p>
                 </div>
               )}
@@ -277,7 +309,7 @@ const BloodTestComparison: React.FC = () => {
               {/* 异常变化提醒 */}
               {comparisonData.abnormal_changes && comparisonData.abnormal_changes.length > 0 && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-                  <h4 className="font-medium text-red-800 mb-2">异常变化提醒</h4>
+                  <h4 className="font-medium text-red-800 mb-2">⚠️ 异常变化提醒</h4>
                   <ul className="text-sm text-red-700 space-y-1">
                     {comparisonData.abnormal_changes.map((change, index) => (
                       <li key={index}>• {change}</li>
@@ -289,7 +321,10 @@ const BloodTestComparison: React.FC = () => {
               {/* 趋势图表 */}
               {comparisonData.trends && Object.keys(comparisonData.trends).length > 0 && (
                 <div className="bg-white rounded-lg p-3 border">
-                  <h4 className="font-medium text-gray-800 mb-3">趋势分析</h4>
+                  <h4 className="font-medium text-gray-800 mb-3">📈 趋势分析</h4>
+                  <div className="text-xs text-gray-500 mb-2">
+                    显示 {selectedReport?.patient_name} 在不同日期的指标变化趋势
+                  </div>
                   <ResponsiveContainer width="100%" height={200}>
                     <LineChart data={prepareChartData(comparisonData.trends)}>
                       <CartesianGrid strokeDasharray="3 3" />
@@ -321,6 +356,7 @@ const BloodTestComparison: React.FC = () => {
               {/* 趋势详情 */}
               {comparisonData.trends && (
                 <div className="space-y-2">
+                  <h4 className="font-medium text-gray-800 mb-2">📊 指标趋势详情</h4>
                   {Object.entries(comparisonData.trends).map(([indicator, data]) => (
                     <div key={indicator} className="flex items-center justify-between p-2 bg-white rounded border">
                       <span className="text-sm font-medium">{indicator}</span>
